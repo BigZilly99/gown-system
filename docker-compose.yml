@@ -1,0 +1,47 @@
+# Docker Compose for UniGown Pro
+# Optimized for low-resource deployment
+
+version: '3.8'
+
+services:
+  gown-app:
+    build: .
+    container_name: unigown-pro
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      - GUNICORN_WORKERS=2
+      - GUNICORN_THREADS=4
+      - LOG_LEVEL=info
+    volumes:
+      - ./instance:/app/instance
+      - ./app/uploads:/app/app/uploads
+    # Resource limits for low CPU environments
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/auth/login') or exit(1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Optional: Redis for caching in production
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: unigown-redis
+  #   restart: unless-stopped
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.5'
+  #         memory: 128M

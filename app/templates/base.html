@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FoCIS Gown System - Faculty of Computing and Information Systems{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Alpine.js for interactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        slate: {
+                            850: '#1a2234',
+                            950: '#0a0f1a',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --header-height: 64px;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        /* Apple Liquid Glass Background - Mesh Gradient */
+        .apple-background {
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 40% 60%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+        }
+        
+        .dark .apple-background {
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 40% 60%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+        }
+        
+        /* Material A: High Blur Glass (Navigation/Sidebar) */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-right: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
+        }
+        
+        .dark .glass-nav {
+            background: rgba(15, 23, 42, 0.75);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        /* Material B: Content Glass (Cards - Higher opacity for readability) */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 
+                0 4px 24px rgba(0, 0, 0, 0.06),
+                0 1px 2px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+        
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 4px 24px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Material C: Data Surface (Tables/Forms - Almost solid for readability) */
+        .glass-data {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        
+        .dark .glass-data {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Glass Header */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        
+        .dark .glass-header {
+            background: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        /* Glass Buttons */
+        .glass-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: none;
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        .glass-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+        
+        /* Active nav item */
+        .nav-active {
+            background: rgba(37, 99, 235, 0.12);
+            color: #2563eb;
+            font-weight: 600;
+        }
+        
+        .dark .nav-active {
+            background: rgba(37, 99, 235, 0.2);
+            color: #60a5fa;
+        }
+        
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Smooth transitions */
+        .transition-smooth {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Hover scale */
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Active scale effect */
+        .active-scale:active {
+            transform: scale(0.98);
+        }
+        
+        /* Stat card gradient backgrounds */
+        .stat-gradient-1 { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+        .stat-gradient-2 { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .stat-gradient-3 { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .stat-gradient-4 { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .stat-gradient-5 { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+        .stat-gradient-6 { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); }
+        
+        /* Table row hover */
+        .table-row-hover:hover {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
+        }
+        
+        /* Pulse dot */
+        .pulse-dot {
+            animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        
+        .dark .skeleton {
+            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+            background-size: 200% 100%;
+        }
+        
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Toast animations */
+        .toast-enter {
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Table styles for readability */
+        .data-table {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .dark .data-table {
+            background: rgba(15, 23, 42, 0.95);
+        }
+        
+        .data-table th {
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(8px);
+        }
+        
+        .dark .data-table th {
+            background: rgba(30, 41, 59, 0.8);
+        }
+        
+        .data-table td {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        
+        .dark .data-table td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="h-full apple-background text-slate-900 dark:text-slate-100" x-data="{ 
+    sidebarOpen: false,
+    darkMode: localStorage.getItem('darkMode') === 'true',
+    init() {
+        if (this.darkMode) {
+            document.documentElement.classList.add('dark');
+        }
+    },
+    toggleDarkMode() {
+        this.darkMode = !this.darkMode;
+        localStorage.setItem('darkMode', this.darkMode);
+        if (this.darkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }
+}">
+    
+    {% if current_user.is_authenticated %}
+    <!-- Authenticated Layout Container -->
+    <div class="flex min-h-screen">
+    
+    <!-- Mobile sidebar backdrop -->
+    <div x-show="sidebarOpen" 
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="sidebarOpen = false"
+         class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden">
+    </div>
+    
+    <!-- Sidebar -->
+    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+           class="fixed top-0 left-0 z-50 h-full w-[280px] glass-nav transform transition-transform duration-300 ease-in-out lg:transform-none lg:static lg:z-30 lg:h-screen lg:flex-shrink-0 lg:relative">
+        
+        <!-- Logo -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200/50 dark:border-slate-700/50 lg:h-[64px]">
+            <a href="{{ url_for('main.dashboard') }}" class="flex items-center gap-3">
+                <img src="{{ url_for('static', filename='img/gctu_logo.png') }}" alt="GCTU Logo" class="h-10 w-auto">
+                <span class="text-xl font-bold bg-gradient-to-r from-cyan-600 to-blue-700 bg-clip-text text-transparent dark:from-cyan-400 dark:to-blue-500">FoCIS</span>
+            </a>
+            <button @click="sidebarOpen = false" class="lg:hidden text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                <i class="bi bi-x-lg text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="h-[calc(100vh-8rem)] overflow-y-auto custom-scrollbar p-4 space-y-1 lg:h-[calc(100vh-128px)]">
+            
+            <!-- Main -->
+            <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2">Main</div>
+            
+            <a href="{{ url_for('main.dashboard') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-smooth {% if request.endpoint == 'main.dashboard' %}bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">
+                <i class="bi bi-grid-1x2-fill text-lg"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <!-- Management -->
+            <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mt-4 mb-2">Management</div>
+            
+            {% if user_permissions.can_manage_students %}
+            <a href="{{ url_for('students.index') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-smooth {% if 'students' in request.endpoint and 'verify' not in request.endpoint %}bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">
+                <i class="bi bi-people text-lg"></i>
+                <span>Students</span>
+            </a>
+            {% endif %}
+            
+            {% if user_permissions.is_superadmin %}
+            <a href="{{ url_for('inventory.index') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-smooth {% if 'inventory' in request.endpoint %}bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">
+                <i class="bi bi-box-seam text-lg"></i>
+                <span>Inventory</span>
+            </a>
+            {% endif %}
+            
+            <!-- Transactions -->
+            <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mt-4 mb-2">Transactions</div>
+            
+            <a href="{{ url_for('transactions.index') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-smooth {% if 'transactions' in request.endpoint and request.endpoint not in ['transactions.issue', 'transactions.return_gown'] %}bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">
+                <i class="bi bi-arrow-left-right text-lg"></i>
+                <span>All Transactions</span>
+            </a>
+            
+            {% if user_permissions.can_issue_gowns %}
+            <a href="{{ url_for('transactions.issue') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-smooth {% if request.endpoint == 'transactions.issue' %}bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">
+                <i class="bi bi-box-arrow-up text-lg"></i>
+                <span>Issue Gown</span>
+            </a>
+            {% endif %}
+            
+            {% if user_permissions.can_return_gowns %}
+            <a href="{{ url_for('transactions.return_gown') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-smooth {% if request.endpoint == 'transactions.return_gown' %}bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">
+                <i class="bi bi-box-arrow-down text-lg"></i>
+                <span>Return Gown</span>
+            </a>
+            {% endif %}
+            
+            {% if user_permissions.can_view_transactions %}
+            <a href="{{ url_for('transactions.active') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-smooth {% if request.endpoint == 'transactions.active' %}bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">
+                <i class="bi bi-clock-history text-lg"></i>
+                <span>Active Rentals</span>
+            </a>
+            {% endif %}
+            
+            {% if user_permissions.can_view_audit_logs %}
+            <!-- Administration -->
+            <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mt-4 mb-2">Administration</div>
+            
+            <a href="{{ url_for('auth.users') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-smooth {% if 'auth.users' in request.endpoint %}bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">
+                <i class="bi bi-shield-lock text-lg"></i>
+                <span>Users</span>
+            </a>
+            
+            <a href="{{ url_for('main.audit_logs') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-smooth {% if 'audit' in request.endpoint %}bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">
+                <i class="bi bi-journal-text text-lg"></i>
+                <span>Audit Logs</span>
+            </a>
+            {% endif %}
+        </nav>
+        
+        <!-- User profile -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200/50 dark:border-slate-700/50 glass-nav">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700 flex items-center justify-center">
+                        <span class="text-sm font-semibold text-white">{{ current_user.username[0]|upper }}</span>
+                    </div>
+                    <div class="hidden sm:block">
+                        <div class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ current_user.username }}</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">{{ current_user.role }}</div>
+                    </div>
+                </div>
+                <a href="{{ url_for('auth.logout') }}" 
+                   class="p-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-smooth"
+                   title="Logout">
+                    <i class="bi bi-box-arrow-right text-lg"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <div class="flex-1 min-w-0 flex flex-col lg:flex-1">
+        
+        <!-- Top Header -->
+        <header class="sticky top-0 z-30 h-16 glass-header">
+            <div class="h-full px-4 lg:px-6 flex items-center justify-between">
+                
+                <!-- Mobile menu button -->
+                <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="bi bi-list text-2xl"></i>
+                </button>
+                
+                <!-- Search (placeholder for future) -->
+                <div class="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-sm">
+                    <i class="bi bi-search"></i>
+                    <span>Search students, gowns...</span>
+                    <kbd class="ml-4 px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-xs">⌘K</kbd>
+                </div>
+                
+                <!-- Right side -->
+                <div class="flex items-center gap-2">
+                    <!-- Dark mode toggle -->
+                    <button @click="toggleDarkMode()" 
+                            class="p-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-smooth"
+                            title="Toggle theme">
+                        <i class="bi bi-sun-fill dark:hidden text-lg"></i>
+                        <i class="bi bi-moon-fill hidden dark:block text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Page Content -->
+        <main class="flex-1 p-4 lg:p-6">
+            
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="fixed top-20 right-4 z-50 space-y-2" x-data="{ show: true }">
+                        {% for category, message in messages %}
+                            <div x-show="show"
+                                 x-transition:leave="transition ease-in duration-300"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 @click="show = false"
+                                 class="toast-enter flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg cursor-pointer {% if category == 'success' %}bg-emerald-500 text-white{% elif category == 'danger' %}bg-red-500 text-white{% elif category == 'warning' %}bg-amber-500 text-white{% else %}bg-blue-500 text-white{% endif %}">
+                                {% if category == 'success' %}
+                                    <i class="bi bi-check-circle-fill"></i>
+                                {% elif category == 'danger' %}
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                {% elif category == 'warning' %}
+                                    <i class="bi bi-exclamation-circle-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-info-circle-fill"></i>
+                                {% endif %}
+                                <span class="text-sm font-medium">{{ message }}</span>
+                                <i class="bi bi-x-lg ml-2 opacity-70 hover:opacity-100"></i>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    </div>
+    
+    {% else %}
+    <!-- Auth Layout -->
+    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-850 p-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="fixed top-4 right-4 z-50 space-y-2">
+                    {% for category, message in messages %}
+                        <div class="flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg {% if category == 'success' %}bg-emerald-500 text-white{% elif category == 'danger' %}bg-red-500 text-white{% else %}bg-blue-500 text-white{% endif %}">
+                            <span class="text-sm font-medium">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block auth_content %}{% endblock %}
+    </div>
+    {% endif %}
+    
+    <!-- HTMX loading indicator -->
+    <div id="htmx-loading" class="fixed bottom-4 right-4 z-50 hidden">
+        <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-700 text-white shadow-lg">
+            <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            <span class="text-sm">Loading...</span>
+        </div>
+    </div>
+    
+    <script>
+        // HTMX configuration
+        document.addEventListener('htmx:configRequest', (event) => {
+            // Add CSRF token to all requests
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (csrfToken) {
+                event.detail.headers['X-CSRFToken'] = csrfToken;
+            }
+        });
+        
+        // Show loading indicator
+        document.addEventListener('htmx:xhr:请求', () => {
+            document.getElementById('htmx-loading')?.classList.remove('hidden');
+        });
+        
+        document.addEventListener('htmx:xhr:loadend', () => {
+            document.getElementById('htmx-loading')?.classList.add('hidden');
+        });
+        
+        // Auto-dismiss flash messages
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.querySelectorAll('.toast-enter').forEach(el => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateX(100%)';
+                    setTimeout(() => el.remove(), 300);
+                });
+            }, 5000);
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

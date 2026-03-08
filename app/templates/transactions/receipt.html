@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Receipt - Transaction #{{ transaction.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h4>University Gown Management</h4>
+                    <p class="mb-0">Transaction Receipt</p>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <h5>Transaction #{{ transaction.id }}</h5>
+                        <span class="badge bg-{{ 'success' if transaction.status == 'Returned' else 'warning' }}">
+                            {{ transaction.status }}
+                        </span>
+                    </div>
+                    
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Date:</strong></td>
+                            <td>{{ transaction.issue_date.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Student:</strong></td>
+                            <td>{{ transaction.student.full_name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Index Number:</strong></td>
+                            <td>{{ transaction.student.index_number }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gown Type:</strong></td>
+                            <td>{{ transaction.gown_type }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Return Date:</strong></td>
+                            <td>{{ transaction.expected_return_date.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                    </table>
+                    
+                    <hr>
+                    
+                    <table class="table table-borderless">
+                        <tr>
+                            <td>Deposit:</td>
+                            <td class="text-end">${{ "%.2f"|format(transaction.deposit_amount or 0) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Rental Fee:</td>
+                            <td class="text-end">${{ "%.2f"|format(transaction.rental_fee or 0) }}</td>
+                        </tr>
+                        {% if transaction.damage_fee and transaction.damage_fee > 0 %}
+                        <tr>
+                            <td>Damage Fee:</td>
+                            <td class="text-end">${{ "%.2f"|format(transaction.damage_fee) }}</td>
+                        </tr>
+                        {% endif %}
+                        <tr class="fw-bold">
+                            <td>Total:</td>
+                            <td class="text-end">${{ "%.2f"|format((transaction.total_paid or 0) + (transaction.damage_fee or 0)) }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="card-footer text-center">
+                    <p class="text-muted small mb-0">Thank you for using our service!</p>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button onclick="window.print()" class="btn btn-primary">
+                    <i class="bi bi-printer"></i> Print
+                </button>
+                <a href="{{ url_for('transactions.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .btn, .card-footer { display: none !important; }
+    .card { border: none !important; }
+    body { background: white !important; }
+}
+</style>
+{% endblock %}

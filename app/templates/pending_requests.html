@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Pending Requests - FoCIS Gown System{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Pending Registration Requests</h1>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Review and approve new admin registration requests</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                    <i class="bi bi-hourglass-split text-amber-600 dark:text-amber-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Pending</p>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ users.total }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <i class="bi bi-check-circle text-emerald-600 dark:text-emerald-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Approved</p>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ approved_count }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <i class="bi bi-people text-blue-600 dark:text-blue-400 text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Total Admins</p>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ total_admins }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Requests Table -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Registration Requests</h2>
+        </div>
+        
+        {% if users.items %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-50 dark:bg-slate-900/50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">User</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Requested Department</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Registered</th>
+                        <th class="px-6 py-4 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                    {% for user in users.items %}
+                    <tr class="table-row-hover transition-smooth">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700 flex items-center justify-center">
+                                    <span class="text-sm font-semibold text-white">{{ user.username[0]|upper }}</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-slate-900 dark:text-white">{{ user.username }}</p>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ user.email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if user.department %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
+                                <i class="bi bi-building"></i>
+                                {{ user.department.name }}
+                            </span>
+                            {% else %}
+                            <span class="text-slate-500 dark:text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 pulse-dot"></span>
+                                Pending Approval
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                            {{ user.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{{ url_for('auth.approve_user', user_id=user.id) }}" 
+                                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-smooth active-scale">
+                                    <i class="bi bi-check-lg"></i>
+                                    Approve
+                                </a>
+                                <button onclick="document.getElementById('rejectModal-{{ user.id }}').showModal()" 
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium transition-smooth active-scale">
+                                    <i class="bi bi-x-lg"></i>
+                                    Reject
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if users.pages > 1 %}
+        <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700">
+            <nav class="flex items-center justify-between">
+                <div class="text-sm text-slate-600 dark:text-slate-400">
+                    Showing {{ users.first_item }} to {{ users.last_item }} of {{ users.total }} requests
+                </div>
+                <div class="flex gap-2">
+                    {% if users.has_prev %}
+                    <a href="{{ url_for('auth.pending_requests', page=users.prev_num) }}" 
+                       class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-smooth">
+                        Previous
+                    </a>
+                    {% endif %}
+                    {% if users.has_next %}
+                    <a href="{{ url_for('auth.pending_requests', page=users.next_num) }}" 
+                       class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-smooth">
+                        Next
+                    </a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="p-12 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                <i class="bi bi-inbox text-2xl text-slate-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">No Pending Requests</h3>
+            <p class="text-slate-600 dark:text-slate-400">There are no registration requests waiting for approval.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Rejection Modals -->
+{% for user in users.items %}
+<dialog id="rejectModal-{{ user.id }}" class="modal p-6 rounded-2xl shadow-xl backdrop:bg-slate-900/50">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-700">
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Reject Registration Request</h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">You are about to reject the request from <strong>{{ user.username }}</strong></p>
+        </div>
+        <form method="POST" action="{{ url_for('auth.reject_user', user_id=user.id) }}">
+            <div class="p-6">
+                <label for="reason-{{ user.id }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Reason for rejection (optional)
+                </label>
+                <textarea name="reason" id="reason-{{ user.id }}" rows="3" 
+                          class="w-full px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Enter reason for rejection..."></textarea>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-3 rounded-b-2xl">
+                <button type="button" onclick="document.getElementById('rejectModal-{{ user.id }}').close()" 
+                        class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-smooth">
+                    Cancel
+                </button>
+                <button type="submit" 
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-smooth">
+                    Reject Request
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+{% endfor %}
+{% endblock %}

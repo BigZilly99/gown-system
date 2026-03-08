@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Gown {{ gown.id }} - University Gown Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="page-title">
+                <i class="bi bi-card-list"></i>
+                Gown {{ gown.id }}
+            </h1>
+            <p class="page-subtitle">{{ gown.gown_type.name if gown.gown_type else 'Unknown Type' }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('gowns.edit', gown_id=gown.id) }}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil"></i>
+                Edit
+            </a>
+            <a href="{{ url_for('gowns.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Back
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Gown Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="detail-item">
+                    <span class="detail-label">ID</span>
+                    <span class="detail-value">{{ gown.id }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Type</span>
+                    <span class="detail-value">{{ gown.gown_type.name if gown.gown_type else '-' }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Size</span>
+                    <span class="detail-value">{{ gown.size or '-' }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value">
+                        {% if gown.status == 'Available' %}
+                            <span class="badge bg-success">Available</span>
+                        {% elif gown.status == 'Issued' %}
+                            <span class="badge bg-warning text-dark">Issued</span>
+                        {% elif gown.status == 'Damaged' %}
+                            <span class="badge bg-danger">Damaged</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ gown.status }}</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Condition</span>
+                    <span class="detail-value">{{ gown.condition or '-' }}</span>
+                </div>
+                {% if gown.purchase_date %}
+                <div class="detail-item">
+                    <span class="detail-label">Purchase Date</span>
+                    <span class="detail-value">{{ gown.purchase_date.strftime('%Y-%m-%d') }}</span>
+                </div>
+                {% endif %}
+                {% if gown.notes %}
+                <div class="detail-item">
+                    <span class="detail-label">Notes</span>
+                    <span class="detail-value">{{ gown.notes }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Transaction History</h5>
+            </div>
+            <div class="card-body">
+                {% if transactions %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Issue Date</th>
+                                <th>Return Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in transactions %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('students.view', student_id=t.student.id) }}">
+                                        {{ t.student.index_number }}
+                                    </a>
+                                </td>
+                                <td>{{ t.issue_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% if t.actual_return_date %}
+                                        {{ t.actual_return_date.strftime('%Y-%m-%d') }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if t.status == 'Issued' %}
+                                        <span class="badge bg-warning text-dark">Issued</span>
+                                    {% elif t.status == 'Returned' %}
+                                        <span class="badge bg-success">Returned</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{{ t.status }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mb-0">No transaction history</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

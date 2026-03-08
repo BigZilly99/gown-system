@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Gowns - UniGown Pro{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h1 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">Gowns</h1>
+        <p class="text-slate-500 dark:text-slate-400 mt-1">Manage gown inventory</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <a href="{{ url_for('main.export_gowns') }}" 
+           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+            <i class="bi bi-download"></i>
+            <span class="font-medium">Export</span>
+        </a>
+        <a href="{{ url_for('gowns.new') }}" 
+           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <i class="bi bi-plus-lg"></i>
+            <span>Add Gown</span>
+        </a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="glass-card rounded-2xl p-4 mb-6">
+    <form method="GET" class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="bi bi-search text-slate-400"></i>
+                </div>
+                <input type="text" 
+                       name="search" 
+                       class="block w-full pl-11 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                       placeholder="Search by serial number..."
+                       value="{{ search }}">
+            </div>
+        </div>
+        <div class="md:w-40">
+            <select name="status" 
+                    class="block w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                <option value="">All Status</option>
+                <option value="Available" {% if status_filter == 'Available' %}selected{% endif %}>Available</option>
+                <option value="Issued" {% if status_filter == 'Issued' %}selected{% endif %}>Issued</option>
+                <option value="Damaged" {% if status_filter == 'Damaged' %}selected{% endif %}>Damaged</option>
+                <option value="Retired" {% if status_filter == 'Retired' %}selected{% endif %}>Retired</option>
+            </select>
+        </div>
+        <div class="md:w-40">
+            <select name="type" 
+                    class="block w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                <option value="">All Types</option>
+                {% for gt in gown_types %}
+                <option value="{{ gt.id }}" {% if type_filter == gt.id|string %}selected{% endif %}>{{ gt.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" 
+                    class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <i class="bi bi-search"></i>
+            </button>
+            {% if search or status_filter or type_filter %}
+            <a href="{{ url_for('gowns.index') }}" 
+               class="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                Clear
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Gowns Table -->
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+    {% if gowns.items %}
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 dark:bg-slate-800/50">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Type</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Size</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Condition</th>
+                    <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                {% for gown in gowns.items %}
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                    <td class="px-6 py-4">
+                        <span class="font-mono font-semibold text-slate-900 dark:text-white">{{ gown.id }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-slate-600 dark:text-slate-400">{{ gown.gown_type.name if gown.gown_type else '-' }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-slate-600 dark:text-slate-400">{{ gown.size or '-' }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if gown.status == 'Available' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                                Available
+                            </span>
+                        {% elif gown.status == 'Issued' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                                Issued
+                            </span>
+                        {% elif gown.status == 'Damaged' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                                Damaged
+                            </span>
+                        {% elif gown.status == 'Retired' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400">
+                                Retired
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400">
+                                {{ gown.status }}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-slate-600 dark:text-slate-400">{{ gown.condition or '-' }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center justify-end gap-2">
+                            <a href="{{ url_for('gowns.view', gown_id=gown.id) }}" 
+                               class="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
+                               title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{{ url_for('gowns.edit', gown_id=gown.id) }}" 
+                               class="p-2 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all"
+                               title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% if gown.status != 'Issued' %}
+                            <form method="POST" action="{{ url_for('gowns.delete', gown_id=gown.id) }}" class="inline">
+                                <button type="submit" 
+                                        class="p-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                                        title="Delete"
+                                        onclick="return confirm('Are you sure you want to delete this gown?')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if gowns.pages > 1 %}
+    <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800">
+        <nav class="flex items-center justify-center gap-1">
+            {% if gowns.has_prev %}
+            <a href="{{ url_for('gowns.index', page=gowns.prev_num, search=search, status=status_filter, type=type_filter) }}" 
+               class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            {% endif %}
+            
+            {% for page_num in gowns.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    <a href="{{ url_for('gowns.index', page=page_num, search=search, status=status_filter, type=type_filter) }}" 
+                       class="px-4 py-2 rounded-lg {% if page_num == gowns.page %}bg-blue-600 text-white{% else %}border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800{% endif %} transition-all">
+                        {{ page_num }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if gowns.has_next %}
+            <a href="{{ url_for('gowns.index', page=gowns.next_num, search=search, status=status_filter, type=type_filter) }}" 
+               class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="flex flex-col items-center justify-center py-16 px-4">
+        <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+            <i class="bi bi-person-badge text-4xl text-slate-400"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">No Gowns Found</h3>
+        <p class="text-slate-500 dark:text-slate-400 mb-6 text-center">Get started by adding gowns to your inventory.</p>
+        <a href="{{ url_for('gowns.new') }}" 
+           class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <i class="bi bi-plus-lg"></i>
+            Add Gown
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

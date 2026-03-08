@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}Import Students - Gown System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .import-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .upload-area {
+        border: 2px dashed #e2e8f0;
+        border-radius: 16px;
+        padding: 48px 24px;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        cursor: pointer;
+    }
+    
+    .upload-area:hover {
+        border-color: #3b82f6;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    }
+    
+    .upload-area.dragover {
+        border-color: #3b82f6;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        transform: scale(1.01);
+    }
+    
+    .upload-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+    }
+    
+    .file-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .file-icon {
+        width: 48px;
+        height: 48px;
+        background: #dbeafe;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .format-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+    }
+    
+    .format-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .format-table th {
+        text-align: left;
+        padding: 12px;
+        background: #f8fafc;
+        font-weight: 600;
+        color: #475569;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .format-table td {
+        padding: 12px;
+        border-top: 1px solid #e2e8f0;
+        color: #334155;
+    }
+    
+    .format-table tr:first-child td {
+        border-top: none;
+    }
+    
+    .example-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        background: #f1f5f9;
+        border-radius: 6px;
+        font-size: 12px;
+        color: #64748b;
+        font-family: monospace;
+    }
+    
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    
+    .step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 14px;
+    }
+    
+    .step-number.active {
+        background: #3b82f6;
+        color: white;
+    }
+    
+    .step-number.completed {
+        background: #22c55e;
+        color: white;
+    }
+    
+    .step-line {
+        flex: 1;
+        height: 2px;
+        background: #e2e8f0;
+    }
+    
+    .step-line.active {
+        background: #3b82f6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="import-container">
+    <!-- Page Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Import Students</h1>
+            <p class="text-slate-500 mt-1">Bulk upload students from Excel or CSV file</p>
+        </div>
+        <a href="{{ url_for('students.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back
+        </a>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+        <form method="POST" enctype="multipart/form-data" id="importForm">
+            <!-- Upload Area -->
+            <div class="upload-area" id="uploadArea">
+                <input type="file" name="file" id="fileInput" class="hidden" accept=".xlsx,.xls,.csv" required>
+                
+                <div class="upload-icon">
+                    <i class="bi bi-cloud-arrow-up text-white text-3xl"></i>
+                </div>
+                
+                <h3 class="text-lg font-semibold text-slate-800 mb-2">
+                    Click to upload or drag and drop
+                </h3>
+                <p class="text-slate-500 mb-2">
+                    Excel files (.xlsx, .xls) or CSV files (.csv)
+                </p>
+                <p class="text-sm text-slate-400">
+                    Maximum file size: 16MB
+                </p>
+            </div>
+            
+            <!-- Selected File Display -->
+            <div id="fileDisplay" class="hidden mt-4">
+                <div class="file-card">
+                    <div class="file-icon">
+                        <i class="bi bi-file-earmark-excel text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-semibold text-slate-800" id="fileName">filename.xlsx</p>
+                        <p class="text-sm text-slate-500" id="fileSize">0 KB</p>
+                    </div>
+                    <button type="button" id="removeFile" class="p-2 hover:bg-slate-100 rounded-lg transition">
+                        <i class="bi bi-x-lg text-slate-500"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="mt-6">
+                <button type="submit" class="btn btn-primary w-full" id="submitBtn" disabled>
+                    <i class="bi bi-upload me-2"></i>Import Students
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Format Instructions -->
+    <div class="format-card mb-6">
+        <h3 class="text-lg font-semibold text-slate-800 mb-4">
+            <i class="bi bi-info-circle text-blue-600 me-2"></i>File Format Requirements
+        </h3>
+        
+        <table class="format-table">
+            <thead>
+                <tr>
+                    <th>Column</th>
+                    <th>Description</th>
+                    <th>Examples</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Index Number</strong> <span class="text-red-500">*</span></td>
+                    <td>Student's unique identifier</td>
+                    <td>
+                        <span class="example-badge">2425430233</span>
+                        <span class="example-badge">2024/CS/001</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Full Name</strong> <span class="text-red-500">*</span></td>
+                    <td>Student's full name</td>
+                    <td>
+                        <span class="example-badge">John Doe</span>
+                        <span class="example-badge">Jane Smith</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Programme</strong> <span class="text-red-500">*</span></td>
+                    <td>Program of study</td>
+                    <td>
+                        <span class="example-badge">BSc. Information Technology</span>
+                        <span class="example-badge">Bachelor of Science in Computer Science</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Level</strong></td>
+                    <td>Year/Level of study (optional - will be auto-detected from programme if not provided)</td>
+                    <td>
+                        <span class="example-badge">Level 100</span>
+                        <span class="example-badge">Level 200</span>
+                        <span class="example-badge">Bachelor</span>
+                        <span class="example-badge">Master</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Important Note -->
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="bi bi-exclamation-triangle text-amber-600"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-amber-800">Important Notes</p>
+                <ul class="text-sm text-amber-700 mt-1 list-disc list-inside">
+                    <li>Students with duplicate index numbers will be skipped</li>
+                    <li>Department will be automatically assigned based on programme name</li>
+                    <li>Level will be extracted from programme if not explicitly provided</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Template -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="bi bi-download text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-blue-800">Need a template?</p>
+                    <p class="text-sm text-blue-600">Download our sample Excel file</p>
+                </div>
+            </div>
+            <a href="{{ url_for('static', filename='uploads/student_template.xlsx') }}" class="btn btn-outline-primary btn-sm" download>
+                <i class="bi bi-download me-2"></i>Download
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileDisplay = document.getElementById('fileDisplay');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const removeFile = document.getElementById('removeFile');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Click to upload
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            displayFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            displayFile(e.target.files[0]);
+        }
+    });
+
+    // Remove file
+    removeFile.addEventListener('click', () => {
+        fileInput.value = '';
+        fileDisplay.classList.add('hidden');
+        uploadArea.classList.remove('hidden');
+        submitBtn.disabled = true;
+    });
+
+    function displayFile(file) {
+        uploadArea.classList.add('hidden');
+        fileDisplay.classList.remove('hidden');
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        submitBtn.disabled = false;
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+</script>
+{% endblock %}

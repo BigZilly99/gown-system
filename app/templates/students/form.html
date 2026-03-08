@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - UniGown Pro{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h1 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">{{ title }}</h1>
+    </div>
+    <a href="{{ url_for('students.index') }}" 
+       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+        <i class="bi bi-arrow-left"></i>
+        <span>Back</span>
+    </a>
+</div>
+
+<div class="max-w-2xl mx-auto">
+    <div class="glass-card rounded-2xl p-6">
+        <form method="POST" class="space-y-5">
+            {{ form.hidden_tag() }}
+            
+            <!-- Index Number -->
+            <div>
+                <label for="index_number" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Index Number <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       name="index_number" 
+                       id="index_number"
+                       class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                       value="{{ form.index_number.data or '' }}"
+                       required>
+                {% if form.index_number.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.index_number.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Full Name -->
+            <div>
+                <label for="full_name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Full Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       name="full_name" 
+                       id="full_name"
+                       class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                       value="{{ form.full_name.data or '' }}"
+                       required>
+                {% if form.full_name.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.full_name.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Programme -->
+            <div>
+                <label for="programme" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Programme <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       name="programme" 
+                       id="programme"
+                       class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                       value="{{ form.programme.data or '' }}"
+                       placeholder="e.g., Bachelor of Science in Computer Science"
+                       required>
+                {% if form.programme.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.programme.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Department will be automatically assigned based on programme keywords
+                </p>
+            </div>
+            
+            <!-- Level -->
+            <div>
+                <label for="level" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Level <span class="text-red-500">*</span>
+                </label>
+                <select name="level" 
+                        id="level"
+                        class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        required>
+                    <option value="">Select Level</option>
+                    <option value="Level 100" {% if form.level.data == 'Level 100' %}selected{% endif %}>Level 100</option>
+                    <option value="Level 200" {% if form.level.data == 'Level 200' %}selected{% endif %}>Level 200</option>
+                    <option value="Level 300" {% if form.level.data == 'Level 300' %}selected{% endif %}>Level 300</option>
+                    <option value="Level 400" {% if form.level.data == 'Level 400' %}selected{% endif %}>Level 400</option>
+                    <option value="Diploma" {% if form.level.data == 'Diploma' %}selected{% endif %}>Diploma</option>
+                    <option value="Bachelor" {% if form.level.data == 'Bachelor' %}selected{% endif %}>Bachelor</option>
+                    <option value="Master" {% if form.level.data == 'Master' %}selected{% endif %}>Master</option>
+                    <option value="PhD" {% if form.level.data == 'PhD' %}selected{% endif %}>PhD</option>
+                </select>
+                {% if form.level.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.level.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit" 
+                        class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+                    <i class="bi bi-check-lg"></i>
+                    Save Student
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

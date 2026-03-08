@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - FoCIS Gown System{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h1 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">
+            <i class="bi bi-tags mr-2 text-blue-600 dark:text-blue-400"></i>
+            {{ title }}
+        </h1>
+    </div>
+    <a href="{{ url_for('gowns.types') }}" 
+       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+        <i class="bi bi-arrow-left"></i>
+        <span>Back</span>
+    </a>
+</div>
+
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <form method="POST" class="space-y-5">
+            {{ form.hidden_tag() }}
+            
+            <!-- Name -->
+            <div>
+                <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" 
+                       name="name" 
+                       id="name"
+                       class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                       value="{{ form.name.data or '' }}"
+                       required>
+                {% if form.name.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.name.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Description -->
+            <div>
+                <label for="description" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Description
+                </label>
+                <textarea name="description" 
+                          id="description" 
+                          rows="3"
+                          class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">{{ form.description.data or '' }}</textarea>
+            </div>
+            
+            <!-- Amount Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Deposit Amount -->
+                <div>
+                    <label for="deposit_amount" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Deposit Amount <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                        <input type="number" 
+                               name="deposit_amount" 
+                               id="deposit_amount"
+                               step="0.01"
+                               class="block w-full pl-8 pr-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                               value="{{ form.deposit_amount.data or '' }}"
+                               required>
+                    </div>
+                    {% if form.deposit_amount.errors %}
+                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                            {% for error in form.deposit_amount.errors %}{{ error }}{% endfor %}
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <!-- Rental Fee -->
+                <div>
+                    <label for="rental_fee" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Rental Fee <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                        <input type="number" 
+                               name="rental_fee" 
+                               id="rental_fee"
+                               step="0.01"
+                               class="block w-full pl-8 pr-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                               value="{{ form.rental_fee.data or '' }}"
+                               required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit" 
+                        class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+                    <i class="bi bi-check-lg"></i>
+                    Save Gown Type
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

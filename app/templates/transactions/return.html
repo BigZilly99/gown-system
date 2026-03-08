@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Return Gown - Gown System{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h1 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">
+            <i class="bi bi-arrow-down-circle mr-2 text-green-600 dark:text-green-400"></i>
+            Return Gown
+        </h1>
+        <p class="text-slate-600 dark:text-slate-400 mt-1">Process a gown return from a student</p>
+    </div>
+    <a href="{{ url_for('transactions.index') }}" 
+       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+        <i class="bi bi-arrow-left"></i>
+        <span>Back</span>
+    </a>
+</div>
+
+<!-- Return Form -->
+<div class="max-w-2xl">
+    <div class="glass-card rounded-2xl p-6">
+        <form method="POST" class="space-y-5">
+            {{ form.hidden_tag() }}
+            
+            <!-- Hidden student_id field for form submission -->
+            <input type="hidden" name="student_id" id="selected_student_id" value="">
+            
+            <!-- Student Search -->
+            <div>
+                <label for="student_search" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Search Student with Active Rental <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="bi bi-search text-slate-400"></i>
+                    </div>
+                    <input type="text" 
+                           id="student_search"
+                           placeholder="Search by index number or name..."
+                           class="block w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                           autocomplete="off">
+                </div>
+                
+                <!-- Search Results Dropdown -->
+                <div id="search_results" class="hidden absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 max-h-60 overflow-y-auto">
+                </div>
+                
+                <!-- Selected Student Display -->
+                <div id="selected_student_display" class="hidden mt-3 p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold text-green-900 dark:text-green-100" id="selected_student_name"></p>
+                            <p class="text-sm text-green-700 dark:text-green-300" id="selected_student_index"></p>
+                            <p class="text-sm text-green-600 dark:text-green-400" id="selected_student_details"></p>
+                        </div>
+                        <button type="button" id="clear_selection" class="text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-200">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                {% if form.student_id.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400"> 
+                        {% for error in form.student_id.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+                <p id="student_error" class="mt-2 text-sm text-red-600 dark:text-red-400 hidden">Please select a student</p>
+            </div>
+            
+            <!-- Notes -->
+            <div>
+                <label for="notes" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Notes
+                </label>
+                <textarea name="notes" 
+                          id="notes" 
+                          rows="3"
+                          class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">{{ form.notes.data or '' }}</textarea>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit" 
+                        id="return_submit"
+                        class="w-full py-3 px-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-xl shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+                    <i class="bi bi-check-lg"></i>
+                    Confirm Return
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('student_search');
+    const searchResults = document.getElementById('search_results');
+    const selectedStudentDisplay = document.getElementById('selected_student_display');
+    const selectedStudentId = document.getElementById('selected_student_id');
+    const selectedStudentName = document.getElementById('selected_student_name');
+    const selectedStudentIndex = document.getElementById('selected_student_index');
+    const selectedStudentDetails = document.getElementById('selected_student_details');
+    const clearSelection = document.getElementById('clear_selection');
+    const studentError = document.getElementById('student_error');
+    const returnSubmit = document.getElementById('return_submit');
+    
+    let searchTimeout = null;
+    
+    // Search as user types
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            searchResults.classList.add('hidden');
+            return;
+        }
+        
+        // Debounce search
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            searchStudentsWithRentals(query);
+        }, 300);
+    });
+    
+    // Search function - only searches students with active rentals
+    async function searchStudentsWithRentals(query) {
+        try {
+            const response = await fetch(`/transactions/search-students?q=${encodeURIComponent(query)}`);
+            const students = await response.json();
+            
+            // Filter to only show students who have active rentals (can_rent = false)
+            const studentsWithRentals = students.filter(s => !s.can_rent);
+            
+            if (studentsWithRentals.length === 0) {
+                // Also check if there are any students at all
+                if (students.length === 0) {
+                    searchResults.innerHTML = '<div class="p-3 text-slate-500 dark:text-slate-400">No students found</div>';
+                } else {
+                    searchResults.innerHTML = '<div class="p-3 text-slate-500 dark:text-slate-400">No students with active rentals found</div>';
+                }
+                searchResults.classList.remove('hidden');
+                return;
+            }
+            
+            let html = '';
+            studentsWithRentals.forEach(student => {
+                html += `
+                    <div class="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer student-result" 
+                         data-id="${student.id}" 
+                         data-index="${student.index_number}"
+                         data-name="${student.full_name}"
+                         data-programme="${student.programme}"
+                         data-level="${student.level}"
+                         data-gown-type="${student.active_gown_type || ''}">
+                        <div class="font-medium text-slate-900 dark:text-white">${student.full_name}</div>
+                        <div class="text-sm text-slate-500 dark:text-slate-400">
+                            ${student.index_number} - ${student.programme} (${student.level})
+                            <br><span class="text-green-600 dark:text-green-400 font-medium">Has: ${student.active_gown_type || 'Unknown'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            searchResults.innerHTML = html;
+            searchResults.classList.remove('hidden');
+            
+            // Add click handlers to results
+            document.querySelectorAll('.student-result').forEach(item => {
+                item.addEventListener('click', function() {
+                    selectStudent(this);
+                });
+            });
+        } catch (error) {
+            console.error('Search error:', error);
+        }
+    }
+    
+    // Select student
+    function selectStudent(item) {
+        selectedStudentId.value = item.dataset.id;
+        selectedStudentName.textContent = item.dataset.name;
+        selectedStudentIndex.textContent = item.dataset.index;
+        selectedStudentDetails.textContent = `${item.dataset.programme} - ${item.dataset.level} | Gown: ${item.dataset.gownType}`;
+        
+        searchInput.value = '';
+        searchResults.classList.add('hidden');
+        selectedStudentDisplay.classList.remove('hidden');
+        studentError.classList.add('hidden');
+    }
+    
+    // Clear selection
+    clearSelection.addEventListener('click', function() {
+        selectedStudentId.value = '';
+        selectedStudentDisplay.classList.add('hidden');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.classList.add('hidden');
+        }
+    });
+    
+    // Form validation
+    returnSubmit.addEventListener('click', function(e) {
+        if (!selectedStudentId.value) {
+            e.preventDefault();
+            studentError.classList.remove('hidden');
+            searchInput.focus();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction #{{ transaction.id }} - University Gown Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="page-title">
+                <i class="bi bi-receipt"></i>
+                Transaction #{{ transaction.id }}
+            </h1>
+            <p class="page-subtitle">
+                {% if transaction.status == 'Issued' %}
+                    {% if transaction.is_overdue() %}
+                        <span class="badge bg-danger">Overdue</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Issued</span>
+                    {% endif %}
+                {% elif transaction.status == 'Returned' %}
+                    <span class="badge bg-success">Returned</span>
+                {% elif transaction.status == 'Damaged' %}
+                    <span class="badge bg-danger">Damaged</span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('transactions.receipt', transaction_id=transaction.id) }}" class="btn btn-outline-primary" target="_blank">
+                <i class="bi bi-printer"></i>
+                Print Receipt
+            </a>
+            <a href="{{ url_for('transactions.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Back
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Transaction Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="detail-item">
+                    <span class="detail-label">Transaction ID</span>
+                    <span class="detail-value">#{{ transaction.id }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Issue Date</span>
+                    <span class="detail-value">{{ transaction.issue_date.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Expected Return</span>
+                    <span class="detail-value">{{ transaction.expected_return_date.strftime('%Y-%m-%d') }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Actual Return</span>
+                    <span class="detail-value">
+                        {% if transaction.actual_return_date %}
+                            {{ transaction.actual_return_date.strftime('%Y-%m-%d %H:%M') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                </div>
+                {% if transaction.is_overdue() %}
+                <div class="detail-item">
+                    <span class="detail-label">Days Overdue</span>
+                    <span class="detail-value text-danger">{{ transaction.get_days_overdue() }} days</span>
+                </div>
+                {% endif %}
+                <div class="detail-item">
+                    <span class="detail-label">Issued By</span>
+                    <span class="detail-value">{{ transaction.issuer.username if transaction.issuer else '-' }}</span>
+                </div>
+                {% if transaction.notes %}
+                <div class="detail-item">
+                    <span class="detail-label">Notes</span>
+                    <span class="detail-value">{{ transaction.notes }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Student Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="detail-item">
+                    <span class="detail-label">Index Number</span>
+                    <span class="detail-value">
+                        <a href="{{ url_for('students.view', student_id=transaction.student.id) }}">
+                            {{ transaction.student.index_number }}
+                        </a>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Full Name</span>
+                    <span class="detail-value">{{ transaction.student.full_name }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Programme</span>
+                    <span class="detail-value">{{ transaction.student.programme }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Level</span>
+                    <span class="detail-value">{{ transaction.student.level }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Gown Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="detail-item">
+                    <span class="detail-label">Gown Type</span>
+                    <span class="detail-value">{{ transaction.gown_type or '-' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Payment Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="detail-item">
+                    <span class="detail-label">Deposit Amount</span>
+                    <span class="detail-value">${{ "%.2f"|format(transaction.deposit_amount or 0) }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Rental Fee</span>
+                    <span class="detail-value">${{ "%.2f"|format(transaction.rental_fee or 0) }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Damage Fee</span>
+                    <span class="detail-value">${{ "%.2f"|format(transaction.damage_fee or 0) }}</span>
+                </div>
+                <hr>
+                <div class="detail-item">
+                    <span class="detail-label">Total Paid</span>
+                    <span class="detail-value fw-bold">${{ "%.2f"|format(transaction.total_paid or 0) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+raceback (most recent call last):
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/relationships.py", line 2434, in _determine_joins
+    self.primaryjoin = join_condition(
+    
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/sql/util.py", line 121, in join_condition
+    return Join._join_condition(
+    
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/sql/selectable.py", line 1453, in _join_condition
+    raise exc.NoForeignKeysError(
+    ^
+sqlalchemy.exc.NoForeignKeysError: Can't find any foreign key relationships between 'gowns' and 'transactions'.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/flask/app.py", line 1478, in __call__
+    return self.wsgi_app(environ, start_response)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/flask/app.py", line 1458, in wsgi_app
+    response = self.handle_exception(e)
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/flask/app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/flask/app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/flask/app.py", line 852, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/bigzilly/Desktop/gown system/app/routes/auth.py", line 25, in login
+    user = User.query.filter_by(username=form.username.data).first()
+           ^^^^^^^^^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/flask_sqlalchemy/model.py", line 22, in __get__
+    return cls.query_class(
+    
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/query.py", line 276, in __init__
+    self._set_entities(entities)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/query.py", line 289, in _set_entities
+    coercions.expect(
+    ^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/sql/coercions.py", line 389, in expect
+    insp._post_inspect
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/util/langhelpers.py", line 1235, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ~~~~~~~~~^^^^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/mapper.py", line 2733, in _post_inspect
+    self._check_configure()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/mapper.py", line 2410, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/mapper.py", line 4227, in _configure_registries
+    _do_configure_registries(registries, cascade)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/mapper.py", line 4268, in _do_configure_registries
+    mapper._post_configure_properties()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/mapper.py", line 2427, in _post_configure_properties
+    prop.init()
+    ~~~~~~~~~^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/interfaces.py", line 595, in init
+    self.do_init()
+    ~~~~~~~~~~~~^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/relationships.py", line 1657, in do_init
+    self._setup_join_conditions()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/relationships.py", line 1895, in _setup_join_conditions
+    self._join_condition = jc = JoinCondition(
+    
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/relationships.py", line 2321, in __init__
+    self._determine_joins()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/bigzilly/Desktop/gown system/.venv/lib/python3.13/site-packages/sqlalchemy/orm/relationships.py", line 2455, in _determine_joins
+    raise sa_exc.NoForeignKeysError(
+    ^^^^^^^^^^
+sqlalchemy.exc.NoForeignKeysError: Could not determine join condition between parent/child tables on relationship Gown.transactions - there are no foreign keys linking these tables.  Ensure that referencing columns are associated with a ForeignKey or ForeignKeyConstraint, or specify a 'primaryjoin' expression.
+172.20.10.4 - - [07/Mar/2026 18:07:14] "GET /auth/login?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 304 -
+172.20.10.4 - - [07/Mar/2026 18:07:14] "GET /auth/login?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 304 -

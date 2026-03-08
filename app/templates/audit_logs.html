@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Logs - FoCIS Gown System{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">
+                <i class="bi bi-journal-text mr-2 text-blue-600 dark:text-blue-400"></i>
+                Audit Logs
+            </h1>
+            <p class="text-slate-500 dark:text-slate-400 mt-1">System activity history and security trail</p>
+        </div>
+        
+        <!-- Stats -->
+        <div class="flex items-center gap-3">
+            <div class="bg-white dark:bg-slate-800 rounded-xl px-4 py-2 border border-slate-200 dark:border-slate-700">
+                <div class="text-xs text-slate-500 dark:text-slate-400">Total Events</div>
+                <div class="text-lg font-bold text-slate-900 dark:text-white">{{ logs.total }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Card -->
+    <div class="glass-card rounded-2xl p-6 mb-6">
+        <form method="GET" class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Filter by Action</label>
+                <select name="action" 
+                        class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    <option value="">All Actions</option>
+                    {% for action in actions %}
+                    <option value="{{ action }}" {% if action_filter == action %}selected{% endif %}>{{ action }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex items-end gap-3">
+                <button type="submit" 
+                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transition-all">
+                    <i class="bi bi-search mr-2"></i>
+                    Filter
+                </button>
+                {% if action_filter %}
+                <a href="{{ url_for('main.audit_logs') }}" 
+                   class="px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-all">
+                    Clear
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Audit Logs Table -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        {% if logs.items %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-50 dark:bg-slate-900/50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Timestamp</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">User</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Action</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Entity</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Details</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">IP Address</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                    {% for log in logs.items %}
+                    <tr class="table-row-hover transition-smooth">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <i class="bi bi-clock text-slate-400"></i>
+                                <div>
+                                    <div class="text-sm font-medium text-slate-900 dark:text-white">{{ log.timestamp.strftime('%Y-%m-%d') }}</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ log.timestamp.strftime('%H:%M:%S') }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                                    <span class="text-xs font-semibold text-white">{{ log.user.username[0]|upper if log.user else '?' }}</span>
+                                </div>
+                                <span class="font-medium text-slate-900 dark:text-white">{{ log.user.username if log.user else 'Unknown' }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if 'Login' in log.action or 'Logout' in log.action %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+                                <i class="bi bi-person"></i> {{ log.action }}
+                            </span>
+                            {% elif 'Create' in log.action or 'Add' in log.action %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                                <i class="bi bi-plus-circle"></i> {{ log.action }}
+                            </span>
+                            {% elif 'Edit' in log.action or 'Update' in log.action %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                                <i class="bi bi-pencil"></i> {{ log.action }}
+                            </span>
+                            {% elif 'Delete' in log.action or 'Remove' in log.action %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                                <i class="bi bi-trash"></i> {{ log.action }}
+                            </span>
+                            {% elif 'Approve' in log.action %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
+                                <i class="bi bi-check-circle"></i> {{ log.action }}
+                            </span>
+                            {% elif 'Reject' in log.action %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400">
+                                <i class="bi bi-x-circle"></i> {{ log.action }}
+                            </span>
+                            {% elif 'Issue' in log.action %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400">
+                                <i class="bi bi-box-arrow-up"></i> {{ log.action }}
+                            </span>
+                            {% elif 'Return' in log.action %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400">
+                                <i class="bi bi-box-arrow-down"></i> {{ log.action }}
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                                <i class="bi bi-gear"></i> {{ log.action }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if log.entity_type %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                                {{ log.entity_type }}
+                            </span>
+                            {% if log.entity_id %}
+                            <span class="text-xs text-slate-500 dark:text-slate-400 ml-1">#{{ log.entity_id }}</span>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if log.details %}
+                            <div class="max-w-xs">
+                                <p class="text-sm text-slate-600 dark:text-slate-400 truncate" title="{{ log.details }}">
+                                    {{ log.details }}
+                                </p>
+                            </div>
+                            {% else %}
+                            <span class="text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if log.ip_address %}
+                            <div class="flex items-center gap-2">
+                                <i class="bi bi-globe text-slate-400"></i>
+                                <code class="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-slate-700 dark:text-slate-300">
+                                    {{ log.ip_address }}
+                                </code>
+                            </div>
+                            {% else %}
+                            <span class="text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if logs.pages > 1 %}
+        <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-700">
+            <nav class="flex items-center justify-between">
+                <div class="text-sm text-slate-600 dark:text-slate-400">
+                    Showing {{ logs.first_item }} to {{ logs.last_item }} of {{ logs.total }} entries
+                </div>
+                <div class="flex items-center gap-2">
+                    {% if logs.has_prev %}
+                    <a href="{{ url_for('main.audit_logs', page=logs.prev_num, action=action_filter) }}" 
+                       class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-smooth">
+                        <i class="bi bi-chevron-left mr-1"></i>
+                        Previous
+                    </a>
+                    {% endif %}
+                    
+                    <span class="px-4 py-2 text-slate-600 dark:text-slate-400">
+                        Page {{ logs.page }} of {{ logs.pages }}
+                    </span>
+                    
+                    {% if logs.has_next %}
+                    <a href="{{ url_for('main.audit_logs', page=logs.next_num, action=action_filter) }}" 
+                       class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-smooth">
+                        Next
+                        <i class="bi bi-chevron-right ml-1"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="p-12 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                <i class="bi bi-journal-text text-2xl text-slate-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">No Audit Logs</h3>
+            <p class="text-slate-600 dark:text-slate-400">No activity recorded yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

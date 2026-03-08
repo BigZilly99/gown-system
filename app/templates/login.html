@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block auth_content %}
+<div class="w-full max-w-md">
+    <!-- Logo & Header -->
+    <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center mb-6">
+            <img src="{{ url_for('static', filename='img/gctu_logo.png') }}" alt="GCTU Logo" class="h-20 w-auto">
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">FoCIS Gowns</h1>
+        <p class="text-slate-500 dark:text-slate-400 mt-2">Faculty of Computing and Information Systems</p>
+    </div>
+    
+    <!-- Login Card -->
+    <div class="glass-card rounded-2xl p-8">
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-6">Sign in to your account</h2>
+        
+        <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-5">
+            {{ form.hidden_tag() }}
+            
+            <!-- Next parameter for redirects -->
+            {% if request.args.get('next') %}
+            <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+            {% endif %}
+            
+            <!-- Username -->
+            <div>
+                <label for="username" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Username
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="bi bi-person text-slate-400"></i>
+                    </div>
+                    <input type="text" 
+                           name="username" 
+                           id="username"
+                           class="block w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                           placeholder="Enter your username"
+                           required>
+                </div>
+                {% if form.username.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.username.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Password -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Password
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="bi bi-lock text-slate-400"></i>
+                    </div>
+                    <input type="password" 
+                           name="password" 
+                           id="password"
+                           class="block w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                           placeholder="Enter your password"
+                           required>
+                </div>
+                {% if form.password.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.password.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Remember Me -->
+            <div class="flex items-center justify-between">
+                <label class="flex items-center">
+                    <input type="checkbox" 
+                           name="remember" 
+                           id="remember"
+                           class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:bg-slate-800">
+                    <span class="ml-2 text-sm text-slate-600 dark:text-slate-400">Remember me</span>
+                </label>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" 
+                    class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+                <i class="bi bi-box-arrow-in-right"></i>
+                Sign In
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+.auth-layout {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%);
+    padding: 20px;
+}
+
+.dark .auth-layout {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+</style>
+{% endblock %}

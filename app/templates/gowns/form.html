@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - FoCIS Gown System{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h1 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">
+            <i class="bi bi-person-badge mr-2 text-blue-600 dark:text-blue-400"></i>
+            {{ title }}
+        </h1>
+    </div>
+    <a href="{{ url_for('gowns.index') }}" 
+       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+        <i class="bi bi-arrow-left"></i>
+        <span>Back</span>
+    </a>
+</div>
+
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+        <form method="POST" class="space-y-5">
+            {{ form.hidden_tag() }}
+            
+            <!-- Gown Type -->
+            <div>
+                <label for="gown_type" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Gown Type <span class="text-red-500">*</span>
+                </label>
+                {{ form.gown_type(class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all") }}
+                {% if form.gown_type.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400"> 
+                        {% for error in form.gown_type.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Size and Status Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Size -->
+                <div>
+                    <label for="size" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Size <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.size(class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all") }}
+                </div>
+                
+                <!-- Status -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Status <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.status(class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all") }}
+                </div>
+            </div>
+            
+            <!-- Condition -->
+            <div>
+                <label for="condition" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Condition <span class="text-red-500">*</span>
+                </label>
+                {{ form.condition(class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all") }}
+            </div>
+            
+            <!-- Purchase Date -->
+            <div>
+                <label for="purchase_date" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Purchase Date
+                </label>
+                <input type="date" 
+                       name="purchase_date" 
+                       id="purchase_date"
+                       class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                       value="{{ form.purchase_date.data or '' }}">
+            </div>
+            
+            <!-- Notes -->
+            <div>
+                <label for="notes" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Notes
+                </label>
+                <textarea name="notes" 
+                          id="notes" 
+                          rows="3"
+                          class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">{{ form.notes.data or '' }}</textarea>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit" 
+                        class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+                    <i class="bi bi-check-lg"></i>
+                    Save Gown
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

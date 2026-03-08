@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Register - FoCIS Gowns{% endblock %}
+
+{% block auth_content %}
+<div class="w-full max-w-md">
+    <!-- Logo & Header -->
+    <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center mb-6">
+            <img src="{{ url_for('static', filename='img/gctu_logo.png') }}" alt="GCTU Logo" class="h-20 w-auto">
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">FoCIS Gowns</h1>
+        <p class="text-slate-500 dark:text-slate-400 mt-2">Faculty of Computing and Information Systems</p>
+    </div>
+    
+    <!-- Register Card -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-900/10 border border-slate-200 dark:border-slate-800 p-8">
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Request Access</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Register as an administrator. Your account will need approval from a SuperAdmin.</p>
+        
+        <form method="POST" class="space-y-5">
+            {{ form.hidden_tag() }}
+            
+            <!-- Username -->
+            <div>
+                <label for="username" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Username
+                </label>
+                <input type="text" 
+                       name="username" 
+                       id="username"
+                       class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                       placeholder="Choose a username"
+                       required>
+                {% if form.username.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.username.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Email -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Email
+                </label>
+                <input type="email" 
+                       name="email" 
+                       id="email"
+                       class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                       placeholder="Enter your email"
+                       required>
+                {% if form.email.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.email.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Department -->
+            <div>
+                <label for="department" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Department
+                </label>
+                <select name="department" 
+                        id="department"
+                        class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        required>
+                    {% for choice in form.department.choices %}
+                    <option value="{{ choice[0] }}">{{ choice[1] }}</option>
+                    {% endfor %}
+                </select>
+                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                    <i class="bi bi-info-circle mr-1"></i>
+                    Select your department. A SuperAdmin will need to approve your request.
+                </p>
+                {% if form.department.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.department.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Password -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Password
+                </label>
+                <input type="password" 
+                       name="password" 
+                       id="password"
+                       class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                       placeholder="Choose a password"
+                       required>
+                {% if form.password.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.password.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Confirm Password -->
+            <div>
+                <label for="confirm_password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Confirm Password
+                </label>
+                <input type="password" 
+                       name="confirm_password" 
+                       id="confirm_password"
+                       class="block w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                       placeholder="Confirm your password"
+                       required>
+                {% if form.confirm_password.errors %}
+                    <p class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.confirm_password.errors %}{{ error }}{% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" 
+                    class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+                <i class="bi bi-person-plus"></i>
+                Request Access
+            </button>
+        </form>
+        
+        <!-- Footer -->
+        <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+            <p class="text-center text-sm text-slate-500 dark:text-slate-400">
+                Already have an account? 
+                <a href="{{ url_for('auth.login') }}" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    Sign in
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

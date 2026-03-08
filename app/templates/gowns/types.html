@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Gown Types - University Gown Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="page-title">
+                <i class="bi bi-tags"></i>
+                Gown Types
+            </h1>
+            <p class="page-subtitle">Manage gown categories and pricing</p>
+        </div>
+        <a href="{{ url_for('gowns.new_type') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i>
+            Add Gown Type
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% if gown_types %}
+        {% for gt in gown_types %}
+        <div class="col-md-6 col-xl-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-tag"></i>
+                        {{ gt.name }}
+                    </h5>
+                    <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('gowns.edit_type', type_id=gt.id) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        {% if gt.total_count == 0 %}
+                        <form method="POST" action="{{ url_for('gowns.delete_type', type_id=gt.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete this gown type?')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">{{ gt.description or 'No description' }}</p>
+                    
+                    <div class="row text-center mt-4">
+                        <div class="col-4">
+                            <div class="stat-mini">
+                                <div class="stat-mini-value">{{ gt.total_count }}</div>
+                                <div class="stat-mini-label">Total</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-mini">
+                                <div class="stat-mini-value text-success">{{ gt.available_count }}</div>
+                                <div class="stat-mini-label">Available</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-mini">
+                                <div class="stat-mini-value text-warning">{{ gt.issued_count }}</div>
+                                <div class="stat-mini-label">Issued</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <small class="text-muted">Deposit</small>
+                            <div class="fw-bold">${{ "%.2f"|format(gt.deposit_amount) }}</div>
+                        </div>
+                        <div>
+                            <small class="text-muted">Rental Fee</small>
+                            <div class="fw-bold">${{ "%.2f"|format(gt.rental_fee) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5 text-muted">
+                <i class="bi bi-tags fs-1"></i>
+                <h5>No Gown Types</h5>
+                <p>Create gown types to categorize your inventory.</p>
+                <a href="{{ url_for('gowns.new_type') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                    Add Gown Type
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

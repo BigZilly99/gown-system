@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Transactions - UniGown Pro{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h1 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">Transactions</h1>
+        <p class="text-slate-500 dark:text-slate-400 mt-1">View all gown rental transactions</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <a href="{{ url_for('main.export_transactions') }}" 
+           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+            <i class="bi bi-download"></i>
+            <span class="font-medium">Export</span>
+        </a>
+        <a href="{{ url_for('transactions.issue') }}" 
+           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <i class="bi bi-box-arrow-up"></i>
+            <span>Issue Gown</span>
+        </a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="glass-card rounded-2xl p-4 mb-6">
+    <form method="GET" class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="bi bi-search text-slate-400"></i>
+                </div>
+                <input type="text" 
+                       name="search" 
+                       class="block w-full pl-11 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                       placeholder="Student Index or Name..."
+                       value="{{ search }}">
+            </div>
+        </div>
+        <div class="md:w-48">
+            <select name="status" 
+                    class="block w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                <option value="">All Status</option>
+                <option value="Issued" {% if status_filter == 'Issued' %}selected{% endif %}>Issued</option>
+                <option value="Returned" {% if status_filter == 'Returned' %}selected{% endif %}>Returned</option>
+                <option value="Overdue" {% if status_filter == 'Overdue' %}selected{% endif %}>Overdue</option>
+                <option value="Damaged" {% if status_filter == 'Damaged' %}selected{% endif %}>Damaged</option>
+            </select>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" 
+                    class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <i class="bi bi-search"></i>
+            </button>
+            {% if search or status_filter %}
+            <a href="{{ url_for('transactions.index') }}" 
+               class="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                Clear
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Transactions Table -->
+<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+    {% if transactions.items %}
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 dark:bg-slate-800/50">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ID</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Student</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Gown</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Issue Date</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Return Date</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                {% for t in transactions.items %}
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                    <td class="px-6 py-4">
+                        <span class="font-mono text-sm text-slate-500 dark:text-slate-400">#{{ t.id }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <a href="{{ url_for('students.view', student_id=t.student.id) }}" class="block">
+                            <span class="font-semibold text-slate-900 dark:text-white">{{ t.student.index_number }}</span>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">{{ t.student.full_name }}</p>
+                        </a>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="font-mono text-sm text-blue-600 dark:text-blue-400">
+                            {{ t.gown_type }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-sm text-slate-600 dark:text-slate-400">{{ t.issue_date.strftime('%Y-%m-%d') }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if t.actual_return_date %}
+                            <span class="text-sm text-emerald-600 dark:text-emerald-400">{{ t.actual_return_date.strftime('%Y-%m-%d') }}</span>
+                        {% else %}
+                            <span class="text-sm text-slate-600 dark:text-slate-400">{{ t.expected_return_date.strftime('%Y-%m-%d') }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if t.status == 'Issued' %}
+                            {% if t.is_overdue() %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5 animate-pulse"></span>
+                                    Overdue
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
+                                    Issued
+                                </span>
+                            {% endif %}
+                        {% elif t.status == 'Returned' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                                Returned
+                            </span>
+                        {% elif t.status == 'Damaged' %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400">
+                                Damaged
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400">
+                                {{ t.status }}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center justify-end gap-2">
+                            <a href="{{ url_for('transactions.view', transaction_id=t.id) }}" 
+                               class="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
+                               title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if transactions.pages > 1 %}
+    <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800">
+        <nav class="flex items-center justify-center gap-1">
+            {% if transactions.has_prev %}
+            <a href="{{ url_for('transactions.index', page=transactions.prev_num, search=search, status=status_filter) }}" 
+               class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            {% endif %}
+            
+            {% for page_num in transactions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    <a href="{{ url_for('transactions.index', page=page_num, search=search, status=status_filter) }}" 
+                       class="px-4 py-2 rounded-lg {% if page_num == transactions.page %}bg-blue-600 text-white{% else %}border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800{% endif %} transition-all">
+                        {{ page_num }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if transactions.has_next %}
+            <a href="{{ url_for('transactions.index', page=transactions.next_num, search=search, status=status_filter) }}" 
+               class="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="flex flex-col items-center justify-center py-16 px-4">
+        <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+            <i class="bi bi-arrow-left-right text-4xl text-slate-400"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">No Transactions</h3>
+        <p class="text-slate-500 dark:text-slate-400 mb-6 text-center">Start by issuing a gown to a student.</p>
+        <a href="{{ url_for('transactions.issue') }}" 
+           class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <i class="bi bi-box-arrow-up"></i>
+            Issue Gown
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
